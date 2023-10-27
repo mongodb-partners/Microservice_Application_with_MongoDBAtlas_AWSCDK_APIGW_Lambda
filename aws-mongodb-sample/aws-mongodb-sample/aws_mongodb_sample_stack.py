@@ -7,32 +7,29 @@ from aws_cdk import (
     aws_lambda as _lambda,
     aws_route53_targets as targets,
     aws_secretsmanager as secretsmanager,
-    RemovalPolicy as RemovalPolicy
+    RemovalPolicy as RemovalPolicy,
+    SecretValue as SecretValue
 )
     
 from constructs import Construct
 
 class AwsMongodbSampleStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, atlas_uri : str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # The code that defines your stack goes here
 
-        #  # Fetch the hosted zone
-        # hosted_zone = route53.HostedZone.from_lookup(self, "HostedZone", domain_name="samplequickstart.com")
-
-        # # Create a certificate
-        # certificate = acm.DnsValidatedCertificate(
-        #     self,
-        #     "ApiCertificate",
-        #     domain_name="apix.samplequickstart.com",
-        #     hosted_zone=hosted_zone,
-        #     region="ap-south-1",
-        # )
         env_name = "dev"
-        secretname = "ATLAS_URI"
-        secretarn = "arn:aws:secretsmanager:us-east-1:979559056307:secret:ATLAS_URI-enBH5t"
+        secretname = "ATLAS_URI3"
+        
+        # Create a new secret in Secrets Manager and fetch the ARN
+        mySecret = secretsmanager.Secret(self, "Secret", secret_name = secretname, secret_string_value = SecretValue.unsafe_plain_text(atlas_uri))
+
+        secretarn = mySecret.secret_arn
+        
+        generated_name = mySecret.secret_name
+        
         # Create a user pool
         user_pool = cognito.UserPool(self, "SampleUserPool",
                                     user_pool_name="mysample-userpool",
@@ -58,7 +55,7 @@ class AwsMongodbSampleStack(Stack):
              environment= {
                             "PYTHONPATH" : "dependencies",
                             "ENV": env_name ,
-                            "ATLAS_URI": secretname
+                            "ATLAS_URI": generated_name
                           },
             runtime=_lambda.Runtime.PYTHON_3_11,
             handler="lambda_function.lambda_handler",
@@ -66,7 +63,7 @@ class AwsMongodbSampleStack(Stack):
            
         )
         
-        secret = secretsmanager.Secret.from_secret_attributes(self, secretname , 
+        secret = secretsmanager.Secret.from_secret_attributes(self, secretname, 
         secret_complete_arn=secretarn)
         
         secret.grant_read(grantee=lambdahandler)
@@ -103,18 +100,9 @@ class AwsMongodbSampleStack(Stack):
         scopes=[read_only_scope])
         
         poolClient = user_pool.add_client(env_name + '_Test_AppClient', 
-            auth_flows=cognito.AuthFlow(admin_user_password=True,user_password=True,user_srp=True),
+            auth_flows=cognito.AuthFlow(user_password=True,user_srp=True),
             o_auth=cognito.OAuthSettings(flows=cognito.OAuthFlows(authorization_code_grant=True),
             scopes=[cognito.OAuthScope.resource_server(user_server, read_only_scope)],
             callback_urls= callbackUrls)
         );
         
-        
-        # # Create a Route53 record
-        # route53.ARecord(
-        #     self,
-        #     "ApiRecord",
-        #     record_name="apix",
-        #     zone=hosted_zone,
-        #     target=route53.RecordTarget.from_alias(targets.ApiGateway(api)),
-        # )
