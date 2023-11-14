@@ -120,17 +120,17 @@ Navigate to the Cognito user pool and copy the User Pool ID and Client ID (App I
   
 Open Cloud Shell and create a user with the command mentioned below
  
-  	aws congnito-idp admin-create-user –user-pool-id <YOUR_USER_POOL_ID> –username <USERNAME>
+   	aws cognito-idp admin-create-user --user-pool-id  <YOUR_USER_POOL_ID>  --username apigwtest
  
  
 Once the user is created since it’s created by admin we will have to force change the password by running the below command
  
-        aws congnito-idp admin-set-user-password –user-pool-id <YOUR_USER_POOL_ID> –username <USERNAME> –password<PASSWORD> –permanent
+        aws cognito-idp admin-set-user-password --user-pool-id <YOUR_USER_POOL_ID>  --username apigwtest  --password <PASSWORD> --permanent
  
  
 Replace the User Pool ID and Client ID copied in the above step and also replace the user name and password of the user created above
  
-	aws congnito-idp admin-initiate-auth –user-pool-id <YOUR_USER_POOL_ID> –client-id <CLIENT_ID> –auth-flow ADMIN_NO_SRP_AUTH –auth-parameters USERNAME=<USERNAME>, PASSWORD=<PASSWORD>
+ 	aws cognito-idp admin-initiate-auth --user-pool-id <YOUR_USER_POOL_ID> --client-id <CLIENT_ID>  --auth-flow ADMIN_NO_SRP_AUTH --auth-parameters USERNAME=apigwtest,PASSWORD=<PASSWORD>
  
  
 Copy the ID Token created from the above step and run the below command to test the API
