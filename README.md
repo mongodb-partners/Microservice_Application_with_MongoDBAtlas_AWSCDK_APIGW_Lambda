@@ -113,6 +113,31 @@ Amazon Cognito User pool helps you to deliver frictionless customer identity and
 
       After successfully deploying the stack, Check the `Outputs` section of the stack aws_mongodb_sample_stack, you will see ApiGatewayEndpoint created.
 
+
+## **Test**
+
+Navigate to the Cognito user pool and copy the User Pool ID and Client ID (App Integration tab)  from the Cognito User pool
+  
+Open Cloud Shell and create a user with the command mentioned below
+ 
+  	aws congnito-idp admin-create-user –user-pool-id <YOUR_USER_POOL_ID> –username <USERNAME>
+ 
+ 
+Once the user is created since it’s created by admin we will have to force change the password by running the below command
+ 
+        aws congnito-idp admin-set-user-password –user-pool-id <YOUR_USER_POOL_ID> –username <USERNAME> –password<PASSWORD> –permanent
+ 
+ 
+Replace the User Pool ID and Client ID copied in the above step and also replace the user name and password of the user created above
+ 
+	aws congnito-idp admin-initiate-auth –user-pool-id <YOUR_USER_POOL_ID> –client-id <CLIENT_ID> –auth-flow ADMIN_NO_SRP_AUTH –auth-parameters USERNAME=<USERNAME>, PASSWORD=<PASSWORD>
+ 
+ 
+Copy the ID Token created from the above step and run the below command to test the API
+ 
+	curl –location –request GET ‘<API_GATEWAY_ENDPOINT>’ –header ‘Content-Type: application/json’ –header ‘Authorization: <ID_TOKEN>’
+
+
 ## **Clean up**
 
 Use `cdk destroy --all` to clean up all the AWS CDK resources. 
