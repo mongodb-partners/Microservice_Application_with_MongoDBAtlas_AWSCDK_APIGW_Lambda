@@ -34,7 +34,7 @@ Amazon Cognito User pool helps you to deliver frictionless customer identity and
 
       ```bash
       git clone https://github.com/mongodb-partners/Microservice_Application_with_MongoDBAtlas_AWSCDK_APIGW_Lambda.git
-      cd MongodbQuickstart/aws_mongodb_sample_dir
+      cd aws_mongodb_sample_dir
       ```
 
 1.  ## Prepare the dev environment to run AWS CDK
