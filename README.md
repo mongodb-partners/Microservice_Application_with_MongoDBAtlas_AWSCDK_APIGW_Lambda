@@ -27,9 +27,10 @@ Amazon Cognito User pool helps you to deliver frictionless customer identity and
 
     This demo, instructions, scripts, and cloudformation template are designed to be run in `us-east-1`. With a few modifications, you can try it out in other regions as well. Make sure to change REGION_NAME in global_args.py if not using US-EAST-1
 
-    -  AWS CLI Installed & Configured 
+    -  [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) Installed & Configured 
     -  AWS CDK Installed & Configured
-    -  MongoDB Atlas Account 
+    -  MongoDB Atlas Account
+    -  [MongoDB Atlas CDK Setup](https://www.mongodb.com/developer/products/atlas/deploy-mongodb-atlas-aws-cdk-typescript/)
     -  Python Packages :
       - Python3 - `yum install -y python3`
       - Python Pip - `yum install -y python-pip`
