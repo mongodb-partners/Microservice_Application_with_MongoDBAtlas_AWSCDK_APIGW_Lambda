@@ -80,22 +80,31 @@ Amazon Cognito User pool helps you to deliver frictionless customer identity and
 
     Let us walk through each of the stacks,
 
-    - **Stack: aws_mongo_db_create**
+    - **Stack: AwsMongodbAtlasCreateStack**
 
       This stack will create four resources and return Mongo Db Atlas URL 
 
       a)	MongoDB::Atlas::Cluster
+      
       b)	MongoDB::Atlas::Project
+      
       c)	MongoDB::Atlas::DatabaseUser
+      
       d)	MongoDB::Atlas::ProjectIpAccessList
+      
 
-    - **Stack: aws_mongodb_sample_stack**
+    - **Stack: AwsMongodbSampleStack**
 
-      This stack will create 
+      This stack will create
+      
       a)	Secret for storing ATLAS DB URI
+      
       b)	Cognito User Pool for API Authentication
+      
       c)	Lambda function that will create a database and insert dummy data and return document count
+      
       d)	API Gateway backed by the lambda function created above
+      
 
 
       ```bash
