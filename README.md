@@ -72,8 +72,8 @@ Amazon Cognito User pool helps you to deliver frictionless customer identity and
     You should see an output of the available stacks,
 
     ```bash
-    aws_mongo_db_create
-    aws_mongodb_sample_stack
+    AwsMongodbAtlasCreateStack
+    AwsMongodbSampleStack
     ```
 
 1.  ##  Deploying the application
