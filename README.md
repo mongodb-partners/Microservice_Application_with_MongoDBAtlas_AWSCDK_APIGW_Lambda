@@ -13,7 +13,14 @@ Amazon API Gateway is a fully managed service that makes it easy for developers 
 ## [Amazon Cognito User pool](https://aws.amazon.com/pm/cognito)
 
 Amazon Cognito User pool helps you to deliver frictionless customer identity and access management (CIAM) with a cost-effective and customizable platform. Helps you to add security features such as adaptive authentication, support compliance, and data residency requirements. It can scale to millions of users across devices with a fully managed, high-performing, and reliable identity store.
-#
+
+
+## Reference Architecture
+
+<img width="718" alt="image" src="https://github.com/mongodb-partners/Microservice_Application_with_MongoDBAtlas_AWSCDK_APIGW_Lambda/assets/101570105/93b9925a-bbf9-4dff-a69a-a3db3923e95f">
+
+
+
 
 
 1.  ## Prerequisites
