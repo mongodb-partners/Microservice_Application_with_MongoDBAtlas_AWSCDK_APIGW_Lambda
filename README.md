@@ -39,7 +39,9 @@ Amazon Cognito User pool helps you to deliver frictionless customer identity and
 
 1.  ## Prepare the dev environment to run AWS CDK
 
+ 
     We will use `cdk` to make our deployments easier. Let's go ahead and install the necessary components.
+    Use the link to copy MongoDB Atlas Organization ID
 
     ```bash
     # You should have npm pre-installed
@@ -101,7 +103,7 @@ Amazon Cognito User pool helps you to deliver frictionless customer identity and
       
       b)	Cognito User Pool for API Authentication
       
-      c)	Lambda function that will create a database and insert dummy data and return document count
+      c)	Lambda function that will create a database , insert dummy data and return document count
       
       d)	API Gateway backed by the lambda function created above
       
@@ -133,9 +135,9 @@ Replace the User Pool ID and Client ID copied in the above step and also replace
  	aws cognito-idp admin-initiate-auth --user-pool-id <YOUR_USER_POOL_ID> --client-id <CLIENT_ID>  --auth-flow ADMIN_NO_SRP_AUTH --auth-parameters USERNAME=apigwtest,PASSWORD=<PASSWORD>
  
  
-Copy the ID Token created from the above step and run the below command to test the API
- 
-	curl –location –request GET ‘<API_GATEWAY_ENDPOINT>’ –header ‘Content-Type: application/json’ –header ‘Authorization: <ID_TOKEN>’
+Copy the ID Token created from the above step and run the below command to test the API. Copy the API_GATEWAY_ENDPOINT from the API Gateway console --> API Gateway: APIs: ApiGateway (xxxxxx) :Stages
+
+ 	curl --location --request GET 'https://<API_GATEWAY_ENDPOINT>.execute-api.us-east-1.amazonaws.com/dev' --header 'Content-Type: application/json' --header 'Authorization: <ID_TOKEN>'
 
 
 ## **Clean up**
