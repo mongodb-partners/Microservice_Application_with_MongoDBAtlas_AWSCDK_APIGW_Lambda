@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Todo App</title>
+    <style>
+        /* Basic styling; customize as needed */
+        .todo-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .todo-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Todo List</h1>
+<input type="text" id="new-todo-title" placeholder="Add new todo">
+<button onclick="addTodo()">Add Todo</button>
+<ul id="todo-list" class="todo-list"></ul>
+
+<script>
+    let todos = [];
+
+    function addTodo() {
+        const titleInput = document.getElementById('new-todo-title');
+        const title = titleInput.value;
+        if (title) {
+            todos.push(title);
+            titleInput.value = ''; // Clear input field
+            updateTodoList();
+        }
+    }
+
+    function deleteTodo(index) {
+        todos.splice(index, 1);
+        updateTodoList();
+    }
+
+    function updateTodoList() {
+        const list = document.getElementById('todo-list');
+        list.innerHTML = ''; // Clear current list
+        todos.forEach((todo, index) => {
+            const item = document.createElement('li');
+            item.className = 'todo-item';
+            item.textContent = todo;
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function() { deleteTodo(index); };
+            item.appendChild(deleteButton);
+            list.appendChild(item);
+        });
+    }
+</script>
+</body>
+</html>
