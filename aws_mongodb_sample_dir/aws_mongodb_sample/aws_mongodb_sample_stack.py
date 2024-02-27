@@ -69,12 +69,27 @@ class AwsMongodbSampleStack(Stack):
             code=_lambda.Code.from_asset("aws_mongodb_sample"),
            
         )
-        
+
+        lambda_get_todos = _lambda.Function(
+            self,
+            "LambdaHandlerGetTodos",
+            environment={
+                "PYTHONPATH": "dependencies",
+                "ENV": env_name,
+                "ATLAS_URI": generated_name
+            },
+            runtime=_lambda.Runtime.PYTHON_3_11,
+            handler="lambda_get_todos.lambda_handler",
+            code=_lambda.Code.from_asset("aws_mongodb_sample"),
+
+        )
+
         secret = secretsmanager.Secret.from_secret_attributes(self, secretname, 
         secret_complete_arn=secretarn)
         
         secret.grant_read(grantee=lambdahandler)
-        
+        secret.grant_read(grantee=lambda_get_todos)
+
 
         # Create an API Gateway
         api = apigateway.LambdaRestApi(
@@ -93,10 +108,31 @@ class AwsMongodbSampleStack(Stack):
             
         api.root.add_method('GET')
 
-        
+        # Create a new instance of CognitoUserPoolsAuthorizer for api_get_todos
+        auth_get_todos = apigateway.CognitoUserPoolsAuthorizer(self, "apiAuthorizerGetTodos",
+                                                               cognito_user_pools=[user_pool])
+
+        # Create ApiGatewayGetTodos with the new authorizer
+        api_get_todos = apigateway.LambdaRestApi(
+            self,
+            "ApiGatewayGetTodos",
+            default_method_options={
+                "authorizer": auth_get_todos,
+                "authorization_type": apigateway.AuthorizationType.COGNITO
+            },
+            handler=lambda_get_todos,
+            deploy_options=apigateway.StageOptions(stage_name=env_name),
+            default_cors_preflight_options=apigateway.CorsOptions(
+                allow_origins=apigateway.Cors.ALL_ORIGINS,
+                allow_methods=apigateway.Cors.ALL_METHODS),
+            proxy=False
+        )
+        api_get_todos.root.add_method('GET')
+
         #add callback urls
         callbackUrls = [] 
         callbackUrls.append(api.url)
+        callbackUrls.append(api_get_todos.url)
 
         read_only_scope = cognito.ResourceServerScope(scope_name="read", scope_description="Read-only access")
         # for full access 
