@@ -86,7 +86,7 @@ Amazon Cognito User pool helps you to deliver frictionless customer identity and
     AwsMongodbSampleStack
     ```
 
-1.  ##  Deploying the application
+1.  ##  Deploying the backend application
 
     Let us walk through each of the stacks,
 
@@ -123,6 +123,26 @@ Amazon Cognito User pool helps you to deliver frictionless customer identity and
 
       After successfully deploying the stack, Check the `Outputs` section of the stack aws_mongodb_sample_stack, you will see ApiGatewayEndpoint created.
 
+1.  ##  Deploying the frontend application
+
+    - Install the AWS Amplify CLI: You can install it using npm with the command `npm install -g @aws-amplify/cli`.
+    
+    - Configure Amplify: Run `amplify configure` to set up the AWS Amplify CLI with your AWS account. This process involves signing into the AWS Management Console, creating an IAM user, and configuring the CLI to use this user's credentials.
+    
+    - Initialize Amplify in your React project: Navigate to your project directory in the command line and run `amplify init`. This initializes a new Amplify project and you'll be prompted to answer some questions regarding your project.
+    
+    - Add hosting: Run `amplify add hosting` to add the hosting resources to your project. You'll have options for hosting your app, including a fully managed hosting service.
+    
+    - Deploy your app: Finally, you can deploy your app by running `amplify publish`. This command builds your web application, uploads it to S3, invalidates the CloudFront cache (if you're using it), and provides you with a URL to access your app.
+
+    - Once the deployment is complete you will see an output similar to this:
+
+    ```bash
+    ✔ Deployment complete!
+    https://dev.5er44eb44bab4.amplifyapp.com
+    ```
+    
+    - You can access your application at `https://dev.5er44eb44bab4.amplifyapp.com`.
 
 ## **Test**
 
