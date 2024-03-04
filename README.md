@@ -30,7 +30,7 @@ Amazon Cognito User pool helps you to deliver frictionless customer identity and
     -  [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) Installed & Configured 
     -  AWS CDK Installed & Configured
     -  MongoDB Atlas Account
-    -  [MongoDB Atlas CDK Setup](https://www.mongodb.com/developer/products/atlas/deploy-mongodb-atlas-aws-cdk-typescript/). Please ensure only the setup portion of this link is completed. Not needed to complete the full demo.
+    -  [MongoDB Atlas CDK Setup](https://www.mongodb.com/developer/products/atlas/deploy-mongodb-atlas-aws-cdk-typescript/). Please ensure only the below setup portion of this link is completed. Not needed to complete the full demo.
 
 		a. Ensure the MongoDB organization API keys are stored in the AWS Secrets. Use the AWS CloudFormation [Template](https://github.com/mongodb/awscdk-resources-mongodbatlas/blob/main/examples/profile-secret.yaml).
 
