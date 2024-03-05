@@ -83,28 +83,18 @@ class AwsMongodbSampleStack(Stack):
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
                 allow_methods=apigateway.Cors.ALL_METHODS
             ),
-            proxy=False
         )
 
-        todos_resource = lambda_rest_api.root.add_resource("todos")
-
-        # Add integrations
         lambda_integration_root = apigateway.LambdaIntegration(lambda_handler_root)
-        lambda_integration_get_todos = apigateway.LambdaIntegration(lambda_handler_get_todos)
-        lambda_integration_create_todo = apigateway.LambdaIntegration(lambda_handler_create_todo,
-                                                                      request_templates={
-                                                                          "application/json": "{\"body\": $input.json('$')}"},
-                                                                      request_parameters={
-                                                                          "integration.request.path.id": "method.request.path.id"})  # Corrected mapping expression
-        lambda_integration_delete_todo = apigateway.LambdaIntegration(lambda_handler_delete_todo,
-                                                                      request_parameters={
-                                                                          "integration.request.path.id": "method.request.querystring.id"})  # Adjusted mapping expression to querystring
+        lambda_rest_api.root.add_method("GET", lambda_integration_root)
 
-        # Add methods
-        lambda_rest_api.root.add_method("GET", integration=lambda_integration_root)
-        todos_resource.add_method("GET", integration=lambda_integration_get_todos)
-        todos_resource.add_method("POST", integration=lambda_integration_create_todo)
-        todos_resource.add_method("DELETE", integration=lambda_integration_delete_todo)
+        lambda_integration_get_todos = apigateway.LambdaIntegration(lambda_handler_get_todos)
+        lambda_integration_create_todo = apigateway.LambdaIntegration(lambda_handler_create_todo)
+        lambda_integration_delete_todo = apigateway.LambdaIntegration(lambda_handler_delete_todo)
+        todos_resource = lambda_rest_api.root.add_resource("todos")
+        todos_resource.add_method("GET", lambda_integration_get_todos)
+        todos_resource.add_method("POST", lambda_integration_create_todo)
+        todos_resource.add_method("DELETE", lambda_integration_delete_todo)
 
         read_only_scope = cognito.ResourceServerScope(scope_name="read", scope_description="Read-only access")
         user_server = user_pool.add_resource_server("ResourceServer", identifier="users", scopes=[read_only_scope])

@@ -46,11 +46,7 @@ create_todo_response=$(curl --location --request POST "${api_url}todos" \
 --header 'Content-Type: application/json' \
 --header "Authorization: ${id_token}" \
 --data-raw '{
-    "title": "Complete task",
-    "description": "Finish writing the report",
-    "due_date": "2024-03-10",
-    "priority": "High",
-    "status": "Incomplete"
+    "text": "TODO text"
 }')
 echo "Create todo response: >>>${create_todo_response}<<<"
 
@@ -64,7 +60,10 @@ echo "Get todos response: >>>${get_todos_response}<<<"
 todo_id=$(echo "$create_todo_response" | jq -r '.id')
 
 # Delete the todo
-delete_todo_response=$(curl --location --request DELETE "${api_url}todos/${todo_id}" \
+delete_todo_response=$(curl --location --request DELETE "${api_url}todos" \
 --header 'Content-Type: application/json' \
---header "Authorization: ${id_token}")
+--header "Authorization: ${id_token}" \
+--data-raw '{
+    "id": "'"${todo_id}"'"
+}')
 echo "Delete todo response: >>>${delete_todo_response}<<<"
