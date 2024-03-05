@@ -1,7 +1,6 @@
 import os
 
 import boto3
-from bson.json_util import dumps
 from pymongo import MongoClient
 
 
@@ -15,20 +14,21 @@ def lambda_handler(event, context):
     app_database = mongo_client["app"]
     todos_collection = app_database["todos"]
 
-    todos = todos_collection.find()
+    todo_id = event['pathParameters']['id']
 
-    todos_json = dumps(todos)
+    result = todos_collection.delete_one({"_id": todo_id})
 
-    if todos_json:
+    if result.deleted_count > 0:
         response = {
             "statusCode": 200,
-            "body": todos_json,
+            "body": "Todo deleted successfully",
             "headers": {"Content-Type": "application/json"}
         }
-        return response
     else:
-        return {
+        response = {
             "statusCode": 404,
-            "body": "No todos found",
+            "body": "Todo not found",
             "headers": {"Content-Type": "application/json"}
         }
+
+    return response

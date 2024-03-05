@@ -3,3 +3,4 @@ constructs>=10.0.0,<11.0.0
 awscdk_resources_mongodbatlas
 boto3
 python-dotenv
+bson
