@@ -1,153 +1,113 @@
+import random
+import string
+
 from aws_cdk import (
     Stack,
-    aws_certificatemanager as acm,
-    aws_route53 as route53,
     aws_cognito as cognito,
-    aws_apigateway as apigateway,
     aws_lambda as _lambda,
-    aws_route53_targets as targets,
     aws_secretsmanager as secretsmanager,
-    RemovalPolicy as RemovalPolicy,
     SecretValue as SecretValue,
-    CfnOutput
+    aws_apigateway as apigateway
 )
-import subprocess
-
 from constructs import Construct
-import string
-import random
+
 
 class AwsMongodbSampleStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, atlas_uri : str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, atlas_uri: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        # The code that defines your stack goes here
 
         env_name = "dev"
         secretname = "ATLAS_URI3"
 
-        # Create a new secret in Secrets Manager and fetch the ARN
-        mySecret = secretsmanager.Secret(self, "Secret", secret_name = secretname, secret_string_value = SecretValue.unsafe_plain_text(atlas_uri))
+        secret = secretsmanager.Secret(self, "Secret", secret_name=secretname,
+                                       secret_string_value=SecretValue.unsafe_plain_text(atlas_uri))
+        secret_arn = secret.secret_arn
+        secret_name = secret.secret_name
 
-        secretarn = mySecret.secret_arn
-
-        generated_name = mySecret.secret_name
-
-        # Create a user pool
         user_pool = cognito.UserPool(self, "SampleUserPool",
-                                    user_pool_name="mysample-userpool",
-                                    sign_in_case_sensitive=False,
-                                    sign_in_aliases=cognito.SignInAliases(
-                                                    username=True,
-                                                    email=True),
-                                    self_sign_up_enabled= True
-                                    )
+                                     user_pool_name="mysample-userpool",
+                                     sign_in_case_sensitive=False,
+                                     sign_in_aliases=cognito.SignInAliases(
+                                         username=True,
+                                         email=True),
+                                     self_sign_up_enabled=True
+                                     )
 
-        # using random.choices()
-        # generating random strings
-        res = ''.join(random.choices(string.ascii_lowercase +
-                             string.digits, k=7))
+        random_string = str("".join(random.choices(string.ascii_lowercase + string.digits, k=7)))
+        domain_prefix = "mysample-app" + random_string
+        cognito_domain = cognito.CognitoDomainOptions(domain_prefix=domain_prefix)
+        user_pool.add_domain("CognitoDomain", cognito_domain=cognito_domain)
 
-        # Create domain prefix here                            
-        user_pool.add_domain("CognitoDomain",
-        cognito_domain=cognito.CognitoDomainOptions(domain_prefix ="mysample-app" + str(res))
-        )
+        # noinspection PyTypeChecker
+        cognito_user_pools_authorizer = apigateway.CognitoUserPoolsAuthorizer(
+            self, "apiAuthorizer",
+            cognito_user_pools=[user_pool])
 
-        auth = apigateway.CognitoUserPoolsAuthorizer(self, "apiAuthorizer",
-                                                     cognito_user_pools=[user_pool])
-
-        auth_get_todos = apigateway.CognitoUserPoolsAuthorizer(self, "apiAuthorizerGetTodos",
-                                                     cognito_user_pools=[user_pool])
-
-        # Create a lambda function
-        lambdahandler = _lambda.Function(
-            self,
-            "ApiHandler",
-             environment= {
-                            "PYTHONPATH" : "dependencies",
-                            "ENV": env_name ,
-                            "ATLAS_URI": generated_name
-                          },
-            runtime=_lambda.Runtime.PYTHON_3_11,
-            handler="lambda_function.lambda_handler",
-            code=_lambda.Code.from_asset("aws_mongodb_sample"),
-
-        )
-
-        secret = secretsmanager.Secret.from_secret_attributes(self, secretname,
-        secret_complete_arn=secretarn)
-
-        secret.grant_read(grantee=lambdahandler)
-
-        lambdahandler_get_todos = _lambda.Function(
-            self,
-            "ApiHandlerGetTodos",
-            environment={
-                "PYTHONPATH": "dependencies",
-                "ENV": env_name,
-                "ATLAS_URI": generated_name
-            },
-            runtime=_lambda.Runtime.PYTHON_3_11,
-            handler="lambda_function_get_todos.lambda_handler",
-            code=_lambda.Code.from_asset("aws_mongodb_sample"),
-
-        )
-
-        secret.grant_read(grantee=lambdahandler_get_todos)
-
-
-        # Create an API Gateway
-        api = apigateway.LambdaRestApi(
-            self,
-            "ApiGateway",
-            default_method_options={
-                                     "authorizer": auth,
-                                     "authorization_type": apigateway.AuthorizationType.COGNITO},
-            handler=lambdahandler,
-            deploy_options = apigateway.StageOptions(stage_name = env_name),
-            default_cors_preflight_options=apigateway.CorsOptions(
-                allow_origins=apigateway.Cors.ALL_ORIGINS,
-                allow_methods=apigateway.Cors.ALL_METHODS),
-            proxy=False
+        def create_lambda_function(stack, name, handler_name):
+            # noinspection PyTypeChecker
+            return _lambda.Function(
+                stack,
+                name,
+                environment={
+                    "PYTHONPATH": "dependencies",
+                    "ENV": env_name,
+                    "ATLAS_URI": secret_name
+                },
+                runtime=_lambda.Runtime.PYTHON_3_11,
+                handler=f"{handler_name}.lambda_handler",
+                code=_lambda.Code.from_asset("aws_mongodb_sample"),
             )
 
-        api.root.add_method('GET')
+        # Usage:
+        lambda_handler_root = create_lambda_function(self, "ApiHandlerRoot", "lambda_function_root")
+        lambda_handler_get_todos = create_lambda_function(self, "ApiHandlerGetTodos", "lambda_function_get_todos")
+        lambda_handler_create_todo = create_lambda_function(self, "ApiHandlerCreateTodo", "lambda_function_create_todo")
+        lambda_handler_delete_todo = create_lambda_function(self, "ApiHandlerDeleteTodo", "lambda_function_delete_todo")
 
-        api_get_todos = apigateway.LambdaRestApi(
+        secret = secretsmanager.Secret.from_secret_attributes(self, secretname, secret_complete_arn=secret_arn)
+        secret.grant_read(grantee=lambda_handler_root)
+        secret.grant_read(grantee=lambda_handler_get_todos)
+        secret.grant_read(grantee=lambda_handler_create_todo)
+        secret.grant_read(grantee=lambda_handler_delete_todo)
+
+        # noinspection PyTypeChecker
+        lambda_rest_api = apigateway.LambdaRestApi(
             self,
-            "ApiGatewayGetTodos",
+            "ApiGateway",
+            handler=lambda_handler_root,
             default_method_options={
-                "authorizer": auth_get_todos,
-                "authorization_type": apigateway.AuthorizationType.COGNITO},
-            handler=lambdahandler_get_todos,
+                "authorizer": cognito_user_pools_authorizer,
+                "authorization_type": apigateway.AuthorizationType.COGNITO
+            },
             deploy_options=apigateway.StageOptions(stage_name=env_name),
             default_cors_preflight_options=apigateway.CorsOptions(
                 allow_origins=apigateway.Cors.ALL_ORIGINS,
-                allow_methods=apigateway.Cors.ALL_METHODS),
+                allow_methods=apigateway.Cors.ALL_METHODS
+            ),
             proxy=False
         )
 
-        api_get_todos.root.add_method('GET')
+        todos_resource = lambda_rest_api.root.add_resource("todos")
 
+        # noinspection PyTypeChecker
+        lambda_integration_get_todos = apigateway.LambdaIntegration(lambda_handler_get_todos)
+        # noinspection PyTypeChecker
+        lambda_integration_create_todo = apigateway.LambdaIntegration(lambda_handler_create_todo)
+        # noinspection PyTypeChecker
+        lambda_integration_delete_todo = apigateway.LambdaIntegration(lambda_handler_delete_todo)
 
-        #add callback urls
-        callbackUrls = []
-        callbackUrls.append(api.url)
-        callbackUrls.append(api_get_todos.url)
+        todos_resource.add_method("GET", integration=lambda_integration_get_todos)
+        todos_resource.add_method("POST", integration=lambda_integration_create_todo)
+        todos_resource.add_method("DELETE", integration=lambda_integration_delete_todo)
 
         read_only_scope = cognito.ResourceServerScope(scope_name="read", scope_description="Read-only access")
-        # for full access 
-        # full_access_scope = cognito.ResourceServerScope(scope_name="*", scope_description="Full access")
-
-        user_server = user_pool.add_resource_server("ResourceServer",
-        identifier="users",
-        scopes=[read_only_scope])
-
-        poolClient = user_pool.add_client(env_name + '_Test_AppClient',
-            auth_flows=cognito.AuthFlow(user_password=True,user_srp=True,admin_user_password=True,custom=True),
-            o_auth=cognito.OAuthSettings(flows=cognito.OAuthFlows(authorization_code_grant=True),
-            scopes=[cognito.OAuthScope.resource_server(user_server, read_only_scope)],
-            callback_urls= callbackUrls)
-        );
-        
+        user_server = user_pool.add_resource_server("ResourceServer", identifier="users", scopes=[read_only_scope])
+        client_name = env_name + "_Test_AppClient"
+        user_pool.add_client(client_name,
+                             auth_flows=cognito.AuthFlow(user_password=True, user_srp=True, admin_user_password=True),
+                             o_auth=cognito.OAuthSettings(
+                                 flows=cognito.OAuthFlows(authorization_code_grant=True),
+                                 scopes=[cognito.OAuthScope.resource_server(user_server, read_only_scope)],
+                                 callback_urls=[lambda_rest_api.url])
+                             )
