@@ -47,7 +47,7 @@ create_todo_response=$(curl --location --request POST "${api_url}todos" \
 --header "Authorization: ${id_token}" \
 --data-raw '{
     "text": "TODO text"
-}')
+}'):x
 echo "Create todo response: >>>${create_todo_response}<<<"
 
 # Get todos

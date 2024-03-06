@@ -18,10 +18,14 @@ def json_response(status_code: int, body: str) -> Dict[str, str]:
     return {
         "statusCode": status_code,
         "body": body,
+<<<<<<< HEAD
         "headers": {"Content-Type": "application/json",
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Methods": "*"
                     }
+=======
+        "headers": {"Content-Type": "application/json"}
+>>>>>>> df/todo_endpoint
     }
 
 
