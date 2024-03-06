@@ -170,3 +170,4 @@ cython_debug/
 
 /aws_mongodb_sample_dir/aws_mongodb_sample/dependencies/
 /aws_mongodb_sample_dir/cdk.out/
+node_modules/
