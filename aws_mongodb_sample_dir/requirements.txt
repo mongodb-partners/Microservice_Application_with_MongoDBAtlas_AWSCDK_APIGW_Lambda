@@ -4,3 +4,4 @@ awscdk_resources_mongodbatlas
 boto3
 python-dotenv
 bson
+pymongo
