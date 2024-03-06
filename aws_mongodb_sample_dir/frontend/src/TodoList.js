@@ -6,11 +6,8 @@ function TodoList() {
     useEffect(() => {
         const fetchTodos = async () => {
             try {
-                // Fetch todos from the backend endpoint with authentication
-                const apiEndpoint = process.env.REACT_APP_API_ENDPOINT;
-                console.log("API endpoint: ", apiEndpoint)
-                let apiToken = process.env.REACT_APP_ID_TOKEN;
-                console.log("API endpoint: ", apiToken)
+                const apiEndpoint = "<YOUR_ENDPOINT>"
+                const apiToken = "<YOUR_TOKEN>"
                 const response = await fetch(apiEndpoint, {
                     headers: {
                         Authorization: `Bearer ${apiToken}`,
