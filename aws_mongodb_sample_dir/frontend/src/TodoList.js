@@ -9,7 +9,7 @@ function TodoList() {
         fetchTodos();
     }, []);
 
-    const apiEndpoint = "https://o72ork5oub.execute-api.us-east-1.amazonaws.com/dev/todos";
+    const apiEndpoint = "https://wn5g4w1hj2.execute-api.us-east-1.amazonaws.com/dev/todos";
 
     const fetchTodos = async () => {
         try {
@@ -50,27 +50,23 @@ function TodoList() {
         }
     };
 
-    return (
-        <div className="container">
-            <h1>My ToDo List</h1>
-            <div className="todo-list-container">
-                {todos.map(todo => (
-                    <p key={todo._id.$oid} className="todo-item">
-                        {todo.text}
-                        <button onClick={() => handleDeleteTodo(todo._id.$oid)}>Delete</button>
-                    </p>
-                ))}
-            </div>
-            <div className="input-container">
-                <input
-                    type="text"
-                    value={newTodoText}
-                    onChange={(e) => setNewTodoText(e.target.value)}
-                />
-                <button onClick={handleCreateTodo}>Add</button>
-            </div>
+    return (<div className="container">
+        <h1>My ToDo List</h1>
+        <div className="todo-list-container">
+            {todos.map(todo => (<p key={todo._id.$oid} className="todo-item">
+                {todo.text}
+                <button onClick={() => handleDeleteTodo(todo._id.$oid)}>Delete</button>
+            </p>))}
         </div>
-    );
+        <div className="input-container">
+            <input
+                type="text"
+                value={newTodoText}
+                onChange={(e) => setNewTodoText(e.target.value)}
+            />
+            <button onClick={handleCreateTodo}>Add</button>
+        </div>
+    </div>);
 }
 
 export default TodoList;
