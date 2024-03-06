@@ -1,74 +1,33 @@
 import json
 import logging
-import os
-from typing import Final
+from typing import Dict, Any, Union
 
-import boto3
-from pymongo import MongoClient
+from pymongo.collection import Collection
+from pymongo.results import InsertOneResult
+
+from lambda_helper import json_response, safe_execute
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-SECRET_NAME: Final = os.environ['ATLAS_URI']
+
+def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Union[int, str, Dict[str, str]]]:
+    return safe_execute(event, context, create_todo, True)
 
 
-def lambda_handler(event, _context):
-    logger.debug('Received event: {}'.format(json.dumps(event)))
+def create_todo(request_body: Dict[str, str], todos_collection: Collection):
+    todo_text: str = request_body["text"]
+    logger.debug(f"{todo_text=}")
 
-    # Check if the request body is present
-    if 'body' not in event or event['body'] is None:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'message': 'Request body is missing or empty'}),
-            'headers': {'Content-Type': 'application/json'}
-        }
+    todo: Dict[str, str] = {"text": todo_text}
+    logger.debug(f"{todo=}")
 
-    try:
-        request_body = json.loads(event['body'])
-    except Exception as e:
-        logger.error('Error loading JSON from request body: {}'.format(e))
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'message': 'Invalid JSON in request body'}),
-            'headers': {'Content-Type': 'application/json'}
-        }
+    result: InsertOneResult = todos_collection.insert_one(todo)
+    logger.debug(f"{result=}")
 
-    secrets_manager = boto3.client('secretsmanager')
-
-    secret_value_response = secrets_manager.get_secret_value(SecretId=SECRET_NAME)
-    connection_string = secret_value_response['SecretString']
-
-    # Connect to MongoDB
-    mongo_client = MongoClient(host=connection_string)
-    app_database = mongo_client["app"]
-    todos_collection = app_database["todos"]
-
-    # Parse the request body to extract todo data
-    # request_body = json.loads(event['body'])
-    todo_text = request_body['text']
-
-    # Create a new todo document
-    todo = {
-        "text": todo_text
-    }
-
-    # Insert the todo document into the collection
-    result = todos_collection.insert_one(todo)
-
-    # Check if the todo was successfully inserted
     if result.inserted_id:
-        # Return success response with the inserted todo ID
-        response = {
-            "statusCode": 201,
-            "body": json.dumps({"id": str(result.inserted_id)}),
-            "headers": {"Content-Type": "application/json"}
-        }
+        inserted_id = str(result.inserted_id)
+        logger.debug(f"{inserted_id=}")
+        return json_response(status_code=201, body=json.dumps({"id": inserted_id}))
     else:
-        # Return error response if the insertion failed
-        response = {
-            "statusCode": 500,
-            "body": "Failed to create todo",
-            "headers": {"Content-Type": "application/json"}
-        }
-
-    return response
+        return json_response(status_code=500, body=json.dumps({"message": "Failed to create TODO!"}))
