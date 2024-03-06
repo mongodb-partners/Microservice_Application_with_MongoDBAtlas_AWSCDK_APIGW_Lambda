@@ -46,10 +46,10 @@ high-performing, and reliable identity store.
 
       c. Ensure the CloudFormation Public Extensions of MongoDB are activated in the Registry.
 
-    -  Python Packages :
-      - Python3 - `yum install -y python3`
-      - Python Pip - `yum install -y python-pip`
-      - Virtualenv - `pip3 install virtualenv`
+    - Python Packages :
+    - Python3 - `yum install -y python3`
+    - Python Pip - `yum install -y python-pip`
+    - Virtualenv - `pip3 install virtualenv`
 
 1.  ## Setting up the environment
 
@@ -119,22 +119,21 @@ high-performing, and reliable identity store.
     - **Stack: AwsMongodbSampleStack**
 
       This stack will create
-      
-      a)	Secret for storing ATLAS DB URI
-      
-      b)	Cognito User Pool for API Authentication
-      
-      c)	Lambda function that will create a database , insert dummy data and return document count
-      
-      d)	API Gateway backed by the lambda function created above
-      
 
+      a)    Secret for storing ATLAS DB URI
+
+      b)    Cognito User Pool for API Authentication
+
+      c)    Lambda function that will create a database , insert dummy data and return document count
+
+      d)    API Gateway backed by the lambda function created above
 
       ```bash
       cdk deploy --all
       ```
 
-      After successfully deploying the stack, Check the `Outputs` section of the stack aws_mongodb_sample_stack, you will see ApiGatewayEndpoint created.
+      After successfully deploying the stack, Check the `Outputs` section of the stack aws_mongodb_sample_stack, you
+      will see ApiGatewayEndpoint created.
 
 ## **Test**
 
@@ -148,7 +147,7 @@ Open Cloud Shell and create a user with the command mentioned below
 Once the user is created since it’s created by admin we will have to force change the password by running the below
 command
 
-        aws cognito-idp admin-set-user-password --user-pool-id <YOUR_USER_POOL_ID>  --username apigwtest  --password <PASSWORD> --permanent
+    aws cognito-idp admin-set-user-password --user-pool-id <YOUR_USER_POOL_ID>  --username apigwtest  --password <PASSWORD> --permanent
 
 Replace the User Pool ID and Client ID copied in the above step and also replace the user name and password of the user
 created above
@@ -161,6 +160,22 @@ from the API Gateway console --> API Gateway: APIs: ApiGateway (xxxxxx) :Stages
  	curl --location --request GET 'https://<API_GATEWAY_ENDPOINT>.execute-api.us-east-1.amazonaws.com/dev' --header 'Content-Type: application/json' --header 'Authorization: <ID_TOKEN>'
 
 ## Creating the frontend application
+
+Switch into the frontend project.
+
+    cd aws_mongodb_sample/frontend
+
+First, you need to initialize Amplify. You can keep the default settings for this.
+
+    amplify init
+
+Next, we need to add hosting to the project. Choose `Hosting with Amplify Console` and `Manual deployment`.
+
+    amplify hosting add
+
+Finally, we can publish the frontend.
+
+    amplify publish
 
 ## **Clean up**
 

@@ -33,7 +33,7 @@ if [ -z "$api_url" ]; then
     exit 1
 fi
 
-aws cognito-idp admin-create-user --user-pool-id  "$latest_user_pool_id"  --username apigwtest
+#aws cognito-idp admin-create-user --user-pool-id  "$latest_user_pool_id"  --username apigwtest
 
 aws cognito-idp admin-set-user-password --user-pool-id "$latest_user_pool_id"  --username apigwtest  --password SuperSafePassword42! --permanent
 
