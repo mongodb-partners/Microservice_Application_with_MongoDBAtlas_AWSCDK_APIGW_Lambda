@@ -1,42 +1,28 @@
-import os
+import json
+import logging
+from typing import Dict, Any, Union
 
-import boto3
 from bson.json_util import dumps
-from pymongo import MongoClient
+from pymongo.collection import Collection
+
+from lambda_helper import json_response, safe_execute
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 
-def lambda_handler(event, context):
-    # Retrieve the connection string from Secrets Manager
-    secrets_manager = boto3.client('secretsmanager')
-    secret_name = os.environ['ATLAS_URI']
-    secret_value_response = secrets_manager.get_secret_value(SecretId=secret_name)
-    connection_string = secret_value_response['SecretString']
+def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Union[int, str, Dict[str, str]]]:
+    return safe_execute(event, context, get_todos, False)
 
-    # Connect to MongoDB
-    mongo_client = MongoClient(host=connection_string)
-    app_database = mongo_client["app"]
-    todos_collection = app_database["todos"]
 
-    # Retrieve all todos from the collection
+def get_todos(_request_body: Dict[str, str], todos_collection: Collection):
     todos = todos_collection.find()
+    logger.debug(f"{todos=}")
 
-    # Convert todos to JSON format
     todos_json = dumps(todos)
+    logger.debug(f"{todos_json=}")
 
-    # Check if todos exist
     if todos_json:
-        # Return success response with todos
-        response = {
-            "statusCode": 200,
-            "body": todos_json,
-            "headers": {"Content-Type": "application/json"}
-        }
+        return json_response(status_code=200, body=todos_json)
     else:
-        # Return not found response if no todos exist
-        response = {
-            "statusCode": 404,
-            "body": "No todos found",
-            "headers": {"Content-Type": "application/json"}
-        }
-
-    return response
+        return json_response(status_code=500, body=json.dumps({"message": "Todo not found"}))

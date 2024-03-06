@@ -13,8 +13,8 @@ from constructs import Construct
 
 
 class AwsMongodbSampleStack(Stack):
-    ENV_NAME: Final = "dev"
-    SECRET_NAME: Final = "ATLAS_URI3"
+    ENV_NAME: Final[str] = "dev"
+    SECRET_NAME: Final[str] = "ATLAS_URI3"
 
     def __init__(self, scope: Construct, construct_id: str, atlas_uri: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)

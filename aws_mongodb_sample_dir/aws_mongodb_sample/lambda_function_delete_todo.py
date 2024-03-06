@@ -1,53 +1,28 @@
 import json
-import os
+import logging
+from typing import Dict, Any, Union
 
-import boto3
 from bson import ObjectId
-from pymongo import MongoClient
+from pymongo.collection import Collection
+
+from lambda_helper import json_response, safe_execute
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 
-def lambda_handler(event, context):
-    print("Incoming event:", json.dumps(event))  # Add this line for debugging
+def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Union[int, str, Dict[str, str]]]:
+    return safe_execute(event, context, delete_todo, True)
 
-    try:
-        # Extract todo id from the request body
-        request_body = json.loads(event['body'])
-        todo_id = ObjectId(request_body['id'])
-    except KeyError as e:
-        error_response = {
-            "statusCode": 400,
-            "body": json.dumps({"message": "Missing required parameter: id"})
-        }
-        return error_response
 
-    # Retrieve the connection string from Secrets Manager
-    secrets_manager = boto3.client('secretsmanager')
-    secret_name = os.environ['ATLAS_URI']
-    secret_value_response = secrets_manager.get_secret_value(SecretId=secret_name)
-    connection_string = secret_value_response['SecretString']
+def delete_todo(request_body: Dict[str, str], todos_collection: Collection):
+    todo_id = ObjectId(request_body["id"])
+    logger.debug(f"{todo_id=}")
 
-    # Connect to MongoDB
-    mongo_client = MongoClient(host=connection_string)
-    app_database = mongo_client["app"]
-    todos_collection = app_database["todos"]
-
-    # Delete the todo from the collection
     result = todos_collection.delete_one({"_id": todo_id})
+    logger.debug(f"{result=}")
 
-    # Check if the todo was successfully deleted
     if result.deleted_count > 0:
-        # Return success response
-        response = {
-            "statusCode": 200,
-            "body": "Todo deleted successfully",
-            "headers": {"Content-Type": "application/json"}
-        }
+        return json_response(status_code=200, body=json.dumps({"message": "Todo deleted successfully"}))
     else:
-        # Return not found response if the todo doesn't exist
-        response = {
-            "statusCode": 404,
-            "body": "Todo not found",
-            "headers": {"Content-Type": "application/json"}
-        }
-
-    return response
+        return json_response(status_code=500, body=json.dumps({"message": "Todo not found"}))
