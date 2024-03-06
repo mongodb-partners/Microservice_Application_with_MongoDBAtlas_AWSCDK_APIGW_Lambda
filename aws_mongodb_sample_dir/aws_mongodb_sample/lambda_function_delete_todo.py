@@ -2,6 +2,7 @@ import json
 import os
 
 import boto3
+from bson import ObjectId
 from pymongo import MongoClient
 
 
@@ -11,7 +12,7 @@ def lambda_handler(event, context):
     try:
         # Extract todo id from the request body
         request_body = json.loads(event['body'])
-        todo_id = request_body['id']
+        todo_id = ObjectId(request_body['id'])
     except KeyError as e:
         error_response = {
             "statusCode": 400,

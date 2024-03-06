@@ -1,16 +1,19 @@
 import json
 import logging
 import os
+from typing import Final
 
 import boto3
 from pymongo import MongoClient
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
+
+SECRET_NAME: Final = os.environ['ATLAS_URI']
 
 
-def lambda_handler(event, context):
-    logger.info('Received event: {}'.format(json.dumps(event)))
+def lambda_handler(event, _context):
+    logger.debug('Received event: {}'.format(json.dumps(event)))
 
     # Check if the request body is present
     if 'body' not in event or event['body'] is None:
@@ -21,7 +24,6 @@ def lambda_handler(event, context):
         }
 
     try:
-        # Load the JSON object from the request body
         request_body = json.loads(event['body'])
     except Exception as e:
         logger.error('Error loading JSON from request body: {}'.format(e))
@@ -31,10 +33,9 @@ def lambda_handler(event, context):
             'headers': {'Content-Type': 'application/json'}
         }
 
-    # Retrieve the connection string from Secrets Manager
     secrets_manager = boto3.client('secretsmanager')
-    secret_name = os.environ['ATLAS_URI']
-    secret_value_response = secrets_manager.get_secret_value(SecretId=secret_name)
+
+    secret_value_response = secrets_manager.get_secret_value(SecretId=SECRET_NAME)
     connection_string = secret_value_response['SecretString']
 
     # Connect to MongoDB
@@ -43,7 +44,7 @@ def lambda_handler(event, context):
     todos_collection = app_database["todos"]
 
     # Parse the request body to extract todo data
-    request_body = json.loads(event['body'])
+    # request_body = json.loads(event['body'])
     todo_text = request_body['text']
 
     # Create a new todo document
