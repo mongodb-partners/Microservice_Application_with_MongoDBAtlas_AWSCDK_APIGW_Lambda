@@ -3,7 +3,7 @@ import string
 from typing import Final
 
 from aws_cdk import SecretValue, Stack
-from aws_cdk.aws_apigateway import CognitoUserPoolsAuthorizer, LambdaRestApi, LambdaIntegration, ResourceBase, \
+from aws_cdk.aws_apigateway import LambdaRestApi, LambdaIntegration, ResourceBase, \
     AuthorizationType, StageOptions, CorsOptions, Cors
 from aws_cdk.aws_cognito import UserPool, CognitoDomainOptions, ResourceServerScope, UserPoolResourceServer, AuthFlow, \
     OAuthSettings, OAuthFlows, SignInAliases, OAuthScope
@@ -40,11 +40,11 @@ class AwsMongodbSampleStack(Stack):
         user_pool.add_domain("CognitoDomain", cognito_domain=cognito_domain)
 
         # noinspection PyTypeChecker
-        cognito_user_pools_authorizer: CognitoUserPoolsAuthorizer = (
-            CognitoUserPoolsAuthorizer(self,
-                                       id="apiAuthorizer",
-                                       cognito_user_pools=[
-                                           user_pool]))
+        # cognito_user_pools_authorizer: CognitoUserPoolsAuthorizer = (
+        #     CognitoUserPoolsAuthorizer(self,
+        #                                id="apiAuthorizer",
+        #                                cognito_user_pools=[
+        #                                    user_pool]))
 
         lambda_handler_root: Function = self._create_lambda_function(self,
                                                                      name="ApiHandlerRoot",
@@ -76,14 +76,16 @@ class AwsMongodbSampleStack(Stack):
             id="ApiGateway",
             handler=lambda_handler_root,
             default_method_options={
-                "authorizer": cognito_user_pools_authorizer,
-                "authorization_type": AuthorizationType.COGNITO
-            },
+                "authorization_type": AuthorizationType.NONE
+                # If you want to use the Cognito authorizer:
+                # "authorizer": cognito_user_pools_authorizer,
+                # "authorization_type": AuthorizationType.COGNITO
+            }, proxy=False,
             deploy_options=StageOptions(stage_name=self.ENV_NAME),
-            default_cors_preflight_options=CorsOptions(
-                allow_origins=Cors.ALL_ORIGINS,
-                allow_methods=Cors.ALL_METHODS
-            ),
+            default_cors_preflight_options=CorsOptions(allow_origins=["*"],
+                                                       allow_methods=["OPTIONS", "GET", "POST", "PUT", "PATCH",
+                                                                      "DELETE"],
+                                                       allow_headers=Cors.DEFAULT_HEADERS)
         )
 
         # noinspection PyTypeChecker

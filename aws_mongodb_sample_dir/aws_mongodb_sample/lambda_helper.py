@@ -18,7 +18,10 @@ def json_response(status_code: int, body: str) -> Dict[str, str]:
     return {
         "statusCode": status_code,
         "body": body,
-        "headers": {"Content-Type": "application/json"}
+        "headers": {"Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "*"
+                    }
     }
 
 

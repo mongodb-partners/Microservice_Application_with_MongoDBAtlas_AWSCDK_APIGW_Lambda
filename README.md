@@ -165,6 +165,10 @@ Switch into the frontend project.
 
     cd aws_mongodb_sample/frontend
 
+Add th URL you retrieved in the above test step to the TodoList.js script.
+
+    const apiEndpoint = "https://o72ork5oub.execute-api.us-east-1.amazonaws.com/dev/todos";
+
 First, you need to initialize Amplify. You can keep the default settings for this.
 
     amplify init
