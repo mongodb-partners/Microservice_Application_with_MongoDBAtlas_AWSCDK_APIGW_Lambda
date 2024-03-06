@@ -1,8 +1,8 @@
 #!/bin/bash
 
-export ORG_ID="65e67d854972ac598c091461"
-export MONGODB_USER="admin"
-export MONGODB_PASSWORD="SuperSafePassword42!"
+export ORG_ID="<ORG_ID>"
+export MONGODB_USER="<MONGODB_USER>"
+export MONGODB_PASSWORD="<MONGODB_PASSWORD>"
 
 python3 -m venv .venv || true
 source .venv/bin/activate
@@ -14,6 +14,6 @@ cd ..
 
 cdk destroy --all --force
 
-cdk bootstrap aws://722245653955/us-east-1
+cdk bootstrap aws://<ACCOUNT_NUMBER>/us-east-1
 
 cdk deploy --all --require-approval never
