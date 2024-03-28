@@ -177,6 +177,10 @@ Next, we need to add hosting to the project. Choose `Hosting with Amplify Consol
 
     amplify hosting add
 
+Whenever you make changes:
+
+    amplify push
+
 Finally, we can publish the frontend.
 
     amplify publish
